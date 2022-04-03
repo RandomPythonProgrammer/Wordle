@@ -3,4 +3,5 @@ project(Wordle__)
 
 set(CMAKE_CXX_STANDARD 23)
 
-add_executable(Wordle__ main.cpp)
+configure_file(resources)
+add_executable(Wordle__ src/main.cpp)

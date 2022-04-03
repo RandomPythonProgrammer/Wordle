@@ -32,10 +32,13 @@ bool in_dictionary(std::vector<std::string> dictionary, std::string input){
     return false;
 }
 
-std::vector<std::string> get_words(){
+std::vector<std::string> get_words(int number){
     std::vector<std::string> string_vector;
     std::fstream file;
-    file.open(std::filesystem::absolute("words.txt"), std::ios::in);;
+    std::filesystem::path path = std::filesystem::absolute(std::filesystem::path("resources") /
+            std::filesystem::path("words"+ std::to_string(number) +".txt"));
+    std::cout<<path<<std::endl;
+    file.open(path, std::ios::in);
     std::string input;
     while (getline(file, input)){
         string_vector.push_back(input);
@@ -48,12 +51,13 @@ void clear_screen(){
     std::cout<<"\033[2J\033[1;1H";
 }
 
-int main() {
-    std::vector<std::string> words = get_words();
-    srand(std::time(0));
+int main(int argc, char* args[]) {
+    std::vector<std::string> words = get_words(argc > 1 ? std::stoi(args[1]) : 5);
+    srand(std::time(nullptr)*std::time(nullptr));
     std::string word = words[(((double) rand())/ ((double) RAND_MAX)) * words.size()];
 
     bool playing = true;
+
     std::string input;
     std::vector<std::string> lines;
     while (playing){
