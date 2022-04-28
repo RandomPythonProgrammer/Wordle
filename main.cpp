@@ -36,6 +36,16 @@ bool in_dictionary(vector<string> dictionary, string input) {
     return false;
 }
 
+string clean_string(string input){
+    string returnStr = "";
+    for (char& letter: input){
+        if ((letter >= 'a' && letter <= 'z') || (letter >= 'A' && letter <= 'Z')){
+            returnStr += letter;
+        }
+    }
+    return returnStr;
+}
+
 vector<string> get_words(int number) {
     vector<string> string_vector;
     fstream file;
@@ -43,6 +53,7 @@ vector<string> get_words(int number) {
     file.open(filepath, ios::in);
     string input;
     while (getline(file, input)) {
+        input = clean_string(input);
         if (input.size() == number) {
             transform(input.begin(), input.end(), input.begin(), ::tolower);
             string_vector.push_back(input);
@@ -56,38 +67,50 @@ void clear_screen() {
     cout << "\033[2J\033[1;1H";
 }
 
+string color_code(string input, string word){
+    string output[input.size()];
+    unordered_map<char, int> map = get_chars(word);
+    for (int i = 0; i < input.size(); i++) {
+        if (input[i] == word[i]) {
+            output[i] = GREEN + BLACK + input[i];
+            map[input[i]]--;
+        }
+    }
+    for (int i = 0; i < input.size(); i++) {
+        if (output[i].empty()) {
+            if (map[input[i]] > 0) {
+                output[i] = YELLOW + BLACK + input[i];
+                map[input[i]]--;
+            } else {
+                output[i] = GREY + BLACK + input[i];
+            }
+        }
+    }
+
+    string result;
+    for (const string& str: output){
+        result += str;
+    }
+    return result;
+}
+
 int main(int argc, char *args[]) {
+    int attempts = argc > 2 ? stoi(args[2]) : 6;
     vector<string> words = get_words(argc > 1 ? stoi(args[1]) : 5);
     srand(system_clock::now().time_since_epoch().count());
     string word = words[(long) ((((double) rand()) / RAND_MAX) * words.size())];
-
     bool playing = true;
-
     string input;
     vector<string> lines;
+
+    cout<<attempts<<endl;
+
     while (playing) {
         clear_screen();
+        cout<<GREEN<<BLACK<<word<<NORMAL<<endl;
         for (string line: lines) {
-            unordered_map<char, int> map = get_chars(word);
-            for (int i = 0; i < line.size(); i++) {
-                if (line[i] == word[i]) {
-                    cout << GREEN << BLACK << line[i];
-                    map[line[i]]--;
-                    if (map[line[i]] <= 0) {
-                        map.erase(line[i]);
-                    }
-                } else {
-                    if (map.contains(line[i])) {
-                        cout << YELLOW << BLACK << line[i];
-                        map[line[i]]--;
-                        if (map[line[i]] <= 0) {
-                            map.erase(line[i]);
-                        }
-                    } else {
-                        cout << GREY << BLACK << line[i];
-                    }
-                }
-            }
+            //removed code
+            cout << color_code(line, word);
             cout << NORMAL << endl;
         }
         cin >> input;
@@ -97,7 +120,7 @@ int main(int argc, char *args[]) {
         if (word == input) {
             playing = false;
             cout << "WIN" << endl;
-        } else if (lines.size() > 5) {
+        } else if (lines.size() >= attempts && attempts != -1) {
             playing = false;
             cout << "LOSE, IT WAS: " << word << endl;
         }
