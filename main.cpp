@@ -107,7 +107,6 @@ int main(int argc, char *args[]) {
 
     while (playing) {
         clear_screen();
-        cout<<GREEN<<BLACK<<word<<NORMAL<<endl;
         for (string line: lines) {
             //removed code
             cout << color_code(line, word);
